@@ -16,6 +16,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.springframework.web.reactive.function.server.ServerResponse.*;
+
 @SpringBootApplication
 public class GktbJavaApplication {
 
@@ -30,9 +34,9 @@ public class GktbJavaApplication {
 
     @Bean
     RouterFunction<ServerResponse> routerFunction(AirportInfoService svc) {
-        return RouterFunctions.route(RequestPredicates.GET("/"), svc::allAirports)
-                .andRoute(RequestPredicates.GET("/{id}"), svc::airportById)
-                .andRoute(RequestPredicates.GET("/metar/{id}"), svc::metar);
+        return route(GET("/"), svc::allAirports)
+                .andRoute(GET("/{id}"), svc::airportById)
+                .andRoute(GET("/metar/{id}"), svc::metar);
     }
 
     @Bean
@@ -63,15 +67,15 @@ class AirportInfoService {
     }
 
     public Mono<ServerResponse> allAirports(ServerRequest req) {
-        return ServerResponse.ok().body(repo.findAll(), Airport.class);
+        return ok().body(repo.findAll(), Airport.class);
     }
 
     public Mono<ServerResponse> airportById(ServerRequest req) {
-        return ServerResponse.ok().body(repo.findById(req.pathVariable("id")), Airport.class);
+        return ok().body(repo.findById(req.pathVariable("id")), Airport.class);
     }
 
     public Mono<ServerResponse> metar(ServerRequest req) {
-        return ServerResponse.ok().body(wxClient.get()
+        return ok().body(wxClient.get()
                 .uri("?loc=" + req.pathVariable("id"))
                 .retrieve()
                 .bodyToMono(METAR.class), METAR.class);
@@ -85,108 +89,3 @@ interface AirportRepository extends ReactiveCrudRepository<Airport, String> {
 record Airport(@Id String id, String name) {}
 
 record METAR(String flight_rules, String raw) {}
-
-/*
-@Document
-class Airport {
-    @Id
-    private String id;
-    private String name;
-
-    public Airport() {
-    }
-
-    public Airport(String id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Airport airport = (Airport) o;
-        return Objects.equals(id, airport.id) && Objects.equals(name, airport.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name);
-    }
-
-    @Override
-    public String toString() {
-        return "Airport{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                '}';
-    }
-}
-*/
-
-/*
-class METAR {
-    private String flight_rules;
-    private String raw;
-
-    public METAR() {
-    }
-
-    public METAR(String flight_rules, String raw) {
-        this.flight_rules = flight_rules;
-        this.raw = raw;
-    }
-
-    public String getFlight_rules() {
-        return flight_rules;
-    }
-
-    public void setFlight_rules(String flight_rules) {
-        this.flight_rules = flight_rules;
-    }
-
-    public String getRaw() {
-        return raw;
-    }
-
-    public void setRaw(String raw) {
-        this.raw = raw;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        METAR metar = (METAR) o;
-        return Objects.equals(flight_rules, metar.flight_rules) && Objects.equals(raw, metar.raw);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(flight_rules, raw);
-    }
-
-    @Override
-    public String toString() {
-        return "METAR{" +
-                "flight_rules='" + flight_rules + '\'' +
-                ", raw='" + raw + '\'' +
-                '}';
-    }
-}*/
