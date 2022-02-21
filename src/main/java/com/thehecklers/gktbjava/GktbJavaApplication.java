@@ -82,6 +82,12 @@ interface AirportRepository extends ReactiveCrudRepository<Airport, String> {
 }
 
 @Document
+record Airport(@Id String id, String name) {}
+
+record METAR(String flight_rules, String raw) {}
+
+/*
+@Document
 class Airport {
     @Id
     private String id;
@@ -132,7 +138,9 @@ class Airport {
                 '}';
     }
 }
+*/
 
+/*
 class METAR {
     private String flight_rules;
     private String raw;
@@ -181,4 +189,4 @@ class METAR {
                 ", raw='" + raw + '\'' +
                 '}';
     }
-}
+}*/
